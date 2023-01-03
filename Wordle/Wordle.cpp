@@ -161,7 +161,7 @@ void InteractiveHelper() {
     string color4;
     string color5;
     string winner;
-    cout << "This is the Solving Assistant. It will tell you all of the remaining possible solutions to your daily wordle.";
+    cout << "This is the Solving Assistant. It will tell you all of the remaining possible solutions to your daily wordle. ";
     cout << "What will your first guess be?" << endl;
     cin >> guess1;
     cout << "Did you get it? yes or no?"<<endl;
@@ -302,7 +302,7 @@ void InteractiveHelper() {
 int main() {
     int control;
     cout << "This is the Wordle Solver! This is version 1.0.0, so only the first feature works. More features coming soon!" << endl;
-    cout << "Enter the number corresponding to what feature you would like to use." << endl << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl << "2 - Fixed Solver: The algorithm solves a word that you input and shows it's guesses." <<endl;
+    cout << "Enter the number corresponding to what feature you would like to use." << endl << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
     cin >> control;
     switch (control) {
     case 1:
@@ -310,6 +310,10 @@ int main() {
         break;
     default:
         cout << "Invalid choice, please enter one of the numbers seen above.";
+        cin >> control;
+        if (control == 1) {
+            InteractiveHelper();
+        }
     }
 }
 
