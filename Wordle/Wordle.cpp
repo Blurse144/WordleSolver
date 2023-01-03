@@ -13,27 +13,14 @@ string green;
 string yellow;
 string red;
 
-//method for checking if a guess is allowed, use it in the console part probably
-//bool IsGuessable(string guess) {
-//    if (guess.length() != 5) {
-//        return false;
-//    }
-//    else {
-//        for (int i = 0; i < 10657; i++) {
-//            if (GuessableWords[i] == guess) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//}
-//I realized halfway through that I need vectors instead of arrays because arrays can't be returned for some reason
+
+
 vector<char> Converter(string convertee) {
     vector<char> v(convertee.begin(), convertee.end());
 
     return v;
 }
-//right now I'm going to go with the assumption that you don't need the colors from teh previous guesses if you have the list of possible remaining words since that list should cover all of the information conveyed by the previous colors. I'm not entirely sure about that, so it may need to change, but it is so much easier to program it with only one guess parameter so this is the way unti any issues arise. 
+
 vector<string> Colors(string solution, string guess) {
     vector<char> S = Converter(solution);
     vector<char> G = Converter(guess);
@@ -54,17 +41,38 @@ vector<string> Colors(string solution, string guess) {
     }
     return colors;
 }
+
+
+
+
+
 //the point of this method is simply to find what words are still possible solutions based on a call to colors. will need to make sure the list doesn't reset at all because it will be recursive
-vector<string> RemainingWords(string solution, string guess, vector<string>RemainingSchmords) {
+vector<string> RemainingWords(string solution, string guess, vector<string>RemainingSchmords, int number, bool interactive, vector<string>input) {
     vector<char> Solution(Converter(solution));
     vector<char> Guess(Converter(guess));
-    //I have to know which guess parameter to use while still using a for loop, so this is necessary
-
+    if (number != 1){
+        vector<char> T;
+        for (int s = 0; s < RemainingSchmords.size(); s++) {
+            string var = RemainingSchmords[s];
+            vector<char> tran(var.begin(), var.end());
+            for (int t = 0; t < 5; t++) {
+                T.push_back(tran[t]);
+            }
+        }
+        PossibleChars = T;
+    }
+    
     //insides will be a for loop for each letter of the word, then a check for what color each letter is, then iterating through what remaining words are left and checking whether they
     //are compatable with the color returned for that individual letter. It is brute forcy, but the list of words it has to check through will decrease each time it does it. 
     //i represents the character in the guess being checked while j represents the word in remaining words vector that it is being checked against.
-  //if (guesses == 1) {
-    vector<string> colors = Colors(solution, guess);
+
+    vector<string>colors;
+    if (!interactive) {
+       colors = Colors(solution, guess);
+    }
+    else if(interactive){
+        colors = input;
+    }
     for (int i = 0; i < 5; i++) {
         string color = colors[i];
         if (color == "green") {
@@ -124,11 +132,176 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
     return RemainingSchmords;
 }
 
-int main() {
-    vector<string>temp = RemainingWords("hello", "raise", PossibleSolutions);
-    for (int i = 0; i < temp.size(); i++) {
-        cout << temp[i]<<" ";
+vector<string> SingleSolver(string solution) {
+    vector<string>ty = RemainingWords(solution, "raise", PossibleSolutions,1, false, {"filler"});
+    vector<string> tye = RemainingWords(solution, "shirt", ty, 2, false, {"filler"});
+    return tye;
+}
+
+void InteractiveHelper() {
+    string guess1;
+    string guess2;
+    string guess3;
+    string guess4;
+    string guess5;
+    string guess6;
+    string color1;
+    string color2;
+    string color3;
+    string color4;
+    string color5;
+    string winner;
+    cout << "What will your first guess be?" << endl;
+    cin >> guess1;
+    cout << "Did you get it? yes or no?"<<endl;
+    cin >> winner;
+    if (winner == "yes") {
+        cout << "Good job you defintely didn't cheat!";
+        return;
     }
+    cout << "Enter the first color as green, yellow, or red" << endl;
+    cin >> color1;
+    cout << "Enter the second color as green, yellow, or red" << endl;
+    cin >> color2;
+    cout << "Enter the third color as green, yellow, or red" << endl;
+    cin >> color3;
+    cout << "Enter the fourth color as green, yellow, or red" << endl;
+    cin >> color4;
+    cout << "Enter the fifth color as green, yellow, or red" << endl;
+    cin >> color5;
+    vector<string> inputted{ color1,color2,color3,color4,color5 };
+    vector<string> List1 = RemainingWords("sucks", guess1, PossibleSolutions, 1, true, inputted);
+    cout << "The remaining possible solutions are: ";
+    for (int a = 0; a < List1.size(); a++) {
+        cout << List1[a]<<" ";
+    }
+    cout << "What will your second guess be?" << endl;
+    cin >> guess1;
+    cout << "Did you get it? yes or no?"<<endl;
+    cin >> winner;
+    if (winner == "yes") {
+        cout << "Good job you got it in 2 guesses!";
+        return;
+    }
+    cout << "Enter the first color as green, yellow, or red" << endl;
+    cin >> color1;
+    cout << "Enter the second color as green, yellow, or red" << endl;
+    cin >> color2;
+    cout << "Enter the third color as green, yellow, or red" << endl;
+    cin >> color3;
+    cout << "Enter the fourth color as green, yellow, or red" << endl;
+    cin >> color4;
+    cout << "Enter the fifth color as green, yellow, or red" << endl;
+    cin >> color5;
+    inputted = { color1,color2,color3,color4,color5 };
+    vector<string> List2 = RemainingWords("sucks", guess1, List1, 2, true, inputted);
+    cout << "The remaining possible solutions are: ";
+    for (int a = 0; a < List2.size(); a++) {
+        cout << List2[a] << " ";
+    }
+    cout << "What will your third guess be?"<< endl;
+    cin >> guess1;
+    cout << "Did you get it? yes or no?" << endl;;
+    cin >> winner;
+    if (winner == "yes") {
+        cout << "Good job you got it in 3 guesses!";
+        return;
+    }
+    cout << "Enter the first color as green, yellow, or red" << endl;
+    cin >> color1;
+    cout << "Enter the second color as green, yellow, or red" << endl;
+    cin >> color2;
+    cout << "Enter the third color as green, yellow, or red" << endl;
+    cin >> color3;
+    cout << "Enter the fourth color as green, yellow, or red" << endl;
+    cin >> color4;
+    cout << "Enter the fifth color as green, yellow, or red" << endl;
+    cin >> color5;
+    inputted = { color1,color2,color3,color4,color5 };
+    vector<string> List3 = RemainingWords("sucks", guess1, List2, 2, true, inputted);
+    cout << "The remaining possible solutions are: ";
+    for (int a = 0; a < List3.size(); a++) {
+        cout << List3[a] << " ";
+    }
+    cout << "What will your fourth guess be?" << endl;
+    cin >> guess1;
+    cout << "Did you get it? yes or no?"<<endl;
+    cin >> winner;
+    if (winner == "yes") {
+        cout << "Good job you got it in 4 guesses!";
+        return;
+    }
+    cout << "Enter the first color as green, yellow, or red" << endl;
+    cin >> color1;
+    cout << "Enter the second color as green, yellow, or red" << endl;
+    cin >> color2;
+    cout << "Enter the third color as green, yellow, or red" << endl;
+    cin >> color3;
+    cout << "Enter the fourth color as green, yellow, or red" << endl;
+    cin >> color4;
+    cout << "Enter the fifth color as green, yellow, or red" << endl;
+    cin >> color5;
+    inputted = { color1,color2,color3,color4,color5 };
+    vector<string> List4 = RemainingWords("sucks", guess1, List3, 2, true, inputted);
+    cout << "The remaining possible solutions are: ";
+    for (int a = 0; a < List4.size(); a++) {
+        cout << List4[a] << " ";
+    }
+    cout << "What will your fifth guess be?" << endl;
+    cin >> guess1;
+    cout << "Did you get it? yes or no?"<<endl;
+    cin >> winner;
+    if (winner == "yes") {
+        cout << "Good job you got it in 5 guesses!";
+        return;
+    }
+    cout << "Enter the first color as green, yellow, or red" << endl;
+    cin >> color1;
+    cout << "Enter the second color as green, yellow, or red" << endl;
+    cin >> color2;
+    cout << "Enter the third color as green, yellow, or red" << endl;
+    cin >> color3;
+    cout << "Enter the fourth color as green, yellow, or red" << endl;
+    cin >> color4;
+    cout << "Enter the fifth color as green, yellow, or red" << endl;
+    cin >> color5;
+    inputted = { color1,color2,color3,color4,color5 };
+    vector<string> List5 = RemainingWords("sucks", guess1, List4, 2, true, inputted);
+    cout << "The remaining possible solutions are: ";
+    for (int a = 0; a < List5.size(); a++) {
+        cout << List5[a] << " ";
+    }
+    cout << "What will your sixth guess be?" << endl;
+    cin >> guess1;
+    cout << "Did you get it? yes or no?"<<endl;
+    cin >> winner;
+    if (winner == "yes") {
+        cout << "Good job you really cut it close!";
+        return;
+    }
+    else {
+        cout << "You didn't get it. Better luck next time!";
+        return;
+    }
+}
+
+int main() {
+    int control;
+    cout << "This is the Wordle Solver! This is version 1.0.0, so only the first feature works. More features coming soon!" << endl;
+    cout << "Enter the number corresponding to what feature you would like to use." << endl << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl << "2 - Fixed Solver: The algorithm solves a word that you input and shows it's guesses." <<endl;
+    cin >> control;
+    switch (control) {
+    case 1:
+        InteractiveHelper();
+        break;
+    default:
+        cout << "Invalid choice, please enter one of the numbers seen above.";
+    }
+    /*vector<string> hitoro{ "yellow", "red", "green","yellow", "red" };
+    vector<string> tester = RemainingWords("sucks", "raise", PossibleSolutions, 1, true, hitoro);
+    for (int e = 0; e < tester.size(); e++) {
+        cout << tester[e] ;
+    }*/
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
