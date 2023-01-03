@@ -151,6 +151,7 @@ void InteractiveHelper() {
     string color4;
     string color5;
     string winner;
+    cout << "This is the Solving Assistant. It will tell you all of the remaining possible solutions to your daily wordle.";
     cout << "What will your first guess be?" << endl;
     cin >> guess1;
     cout << "Did you get it? yes or no?"<<endl;
