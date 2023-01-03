@@ -301,7 +301,7 @@ void InteractiveHelper() {
 //I'm just going to have it prompt the user for which feature they want and then funnel them to the correct function with a simple switch statement.
 int main() {
     int control;
-    cout << "This is the Wordle Solver! This is version 1.0.0, so only the first feature works. More features coming soon!" << endl;
+    cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works. More features coming soon!" << endl;
     cout << "Enter the number corresponding to what feature you would like to use." << endl << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
     cin >> control;
     switch (control) {
