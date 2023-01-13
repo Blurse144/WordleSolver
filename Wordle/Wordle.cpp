@@ -140,21 +140,142 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
 }
 
 
-//This method does not affect Version 1.0.0. It was used for debugging and will be built on for the next version.
-vector<string> SingleSolver(string solution) {
-    vector<string>ty = RemainingWords(solution, "raise", PossibleSolutions,1, false, {"filler"});
-    vector<string> tye = RemainingWords(solution, "shirt", ty, 2, false, {"filler"});
-    return tye;
-}
+//need to find a way to make it randomly select instead of always doing the first one. 
+void SingleSolver() {
+    string solution;
+    bool IsGuessable = false;
+    cout << "What word would you like the bot to solve?" << endl;
+    cin >> solution;
+    for (int i = 0; i < PossibleSolutions.size(); i++) {
+        if (PossibleSolutions[i] == solution) {
+            IsGuessable = true;
+        }
+    }
+    if (IsGuessable == false) {
+        cout << "That word is not in the set of solutions. Please choose another word." << endl;
+        cin >> solution;
+    }
 
+    cout << "The bot started with 'raise'." << endl;
+    if (solution == "raise") {
+        cout << "It was correct! The bot got it in 1 guess." << endl;
+        return;
+    }
+    vector<string>ty1 = RemainingWords(solution, "raise", PossibleSolutions,1, false, {"filler"});
+    cout << "The bot chose " << ty1[0] << " as its next guess."<<endl;
+    if (ty1[0] == solution) {
+        cout << "That guess was correct! The bot got it in 2 guesses." << endl;
+        return;
+    }
+    vector<string> ty2 = RemainingWords(solution, ty1[0], ty1, 2, false, {"filler"});
+    cout << "The bot chose " << ty2[0] << " as its next guess."<<endl;
+    if (ty2[0] == solution) {
+        cout << "That guess was correct! The bot got it in 3 guesses." << endl;
+        return;
+    }
+    vector<string> ty3 = RemainingWords(solution, ty2[0], ty2, 2, false, { "filler" });
+    cout << "The bot chose " << ty3[0] << " as its next guess." << endl;
+    if (ty3[0] == solution) {
+        cout << "That guess was correct! The bot got it in 4 guesses." << endl;
+        return;
+    }
+    vector<string> ty4 = RemainingWords(solution, ty3[0], ty3, 2, false, { "filler" });
+    cout << "The bot chose " << ty4[0] << " as its next guess." << endl;
+    if (ty4[0] == solution) {
+        cout << "That guess was correct! The bot got it in 5 guesses." << endl;
+        return;
+    }
+    vector<string> ty5 = RemainingWords(solution, ty4[0], ty4, 2, false, { "filler" });
+    cout << "The bot chose " << ty5[0] << " as its next guess." << endl;
+    if (ty5[0] == solution) {
+        cout << "That guess was correct! The bot got it in 6 guesses." << endl;
+        return;
+    }
+    else {
+        cout << "The bot failed to guess the solution.";
+        return;
+    }
+}
+//something about line 218 is fucked. it works for the first iteration with sissy, but when it gets to the second iteration with humph, it runs into that vector error. 
+void FirstWord() {
+    
+    int limit = 2308;
+    int NumberOfOnes = 0;
+    int NumberOfTwos = 0;
+    int NumberOfThrees = 0;
+    int NumberOfFours = 0;
+    int NumberOfFives = 0;
+    int NumberOfSixes = 0;
+    int NumberOfFails = 0;
+    int sum = 0;
+
+    cout << endl;
+    
+    int WordsCompleted = limit;
+    for (int i = 0; i <= limit; i++) {
+        if (PossibleSolutions[i] != "raise") {
+            vector<string> ty1 = RemainingWords(PossibleSolutions[i], "raise", PossibleSolutions, 1, false, { "filler" });
+            if (ty1[0] != PossibleSolutions[i]) {
+                vector<string> ty2 = RemainingWords(PossibleSolutions[i], ty1[0], ty1, 2, false, { "filler" });
+                if (ty2[0] != PossibleSolutions[i]) {
+                    vector<string> ty3 = RemainingWords(PossibleSolutions[i], ty2[0], ty2, 3, false, { "filler" });
+                    if (ty3[0] != PossibleSolutions[i]) {
+                        vector<string> ty4 = RemainingWords(PossibleSolutions[i], ty3[0], ty2, 4, false, { "filler" });
+                        if (ty4[0] != PossibleSolutions[i]) {
+                            vector<string> ty5 = RemainingWords(PossibleSolutions[i], ty4[0], ty2, 5, false, { "filler" });
+                            if (ty5[0] != PossibleSolutions[i]) {
+                                NumberOfFails++;
+                                WordsCompleted--;
+                            }
+                            else {
+                                NumberOfSixes++;
+                                sum = sum + 6;
+                            }
+                        }
+                        else {
+                            NumberOfFives++;
+                            sum = sum + 5;
+                        }
+                    }
+                    else {
+                        NumberOfFours++;
+                        sum = sum + 4;
+                    }
+                }
+                else {
+                    NumberOfThrees++;
+                    sum = sum + 3;
+                }
+            }
+            else {
+                NumberOfTwos++;
+                sum = sum + 2;
+            }
+        }
+        else {
+            NumberOfOnes++;
+            sum = sum + 1;
+        }
+    }
+    
+    cout << "The results were as follows: " << endl;
+    cout << "Number of 1s: " << NumberOfOnes << endl;
+    cout << "Number of 2s: " << NumberOfTwos << endl;
+    cout << "Number of 3s: " << NumberOfThrees << endl;
+    cout << "Number of 4s: " << NumberOfFours << endl;
+    cout << "Number of 5s: " << NumberOfFives << endl;
+    cout << "Number of 6s: " << NumberOfSixes << endl;
+    cout << "Number of fails: " << NumberOfFails << endl << endl;
+
+    double average = sum / WordsCompleted;
+    cout << "The average number of guesses for completed words was: " << average << endl;
+    double PercentCompleted = (WordsCompleted / limit) * 100;
+    cout << "The percent of words completed was: " << PercentCompleted;
+
+}
 //The method that performs the first feature.
 void InteractiveHelper() {
     string guess1;
-    string guess2;
-    string guess3;
-    string guess4;
-    string guess5;
-    string guess6;
     string color1;
     string color2;
     string color3;
@@ -297,23 +418,32 @@ void InteractiveHelper() {
 }
 
 
+
+
 //This is the main method. It is the control panel where everything is called. 
 //I'm just going to have it prompt the user for which feature they want and then funnel them to the correct function with a simple switch statement.
 int main() {
     int control;
+    string SingleSolved;
     cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works. More features coming soon!" << endl;
-    cout << "Enter the number corresponding to what feature you would like to use." << endl << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
+    cout << "Enter the number corresponding to what feature you would like to use." << endl; 
+    cout << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
+    cout << "2 - Single Word Solver: The bot solves a provided word, outputting each guess and how man guesses it took" << endl;
+    cout << "3 - First Word Method Solver: The bot will solve the inputted number of words by choosing the first possible word." << endl << "The statistics from it's run will be displayed." << endl;
     cin >> control;
     switch (control) {
-    case 1:
-        InteractiveHelper();
-        break;
     default:
         cout << "Invalid choice, please enter one of the numbers seen above.";
         cin >> control;
-        if (control == 1) {
-            InteractiveHelper();
-        }
+    case 1:
+        InteractiveHelper();
+        break;
+    case 2:
+        SingleSolver();
+        break;
+    case 3:
+        FirstWord();
+        break;
     }
 }
 
