@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <algorithm>
+#include <stdlib.h>
 using namespace std;
 
 //This is all of the words that can be solutions for Wordle, pulled straight from the origional source code. NYT's acquisition may have changed this, but there is nothing to be done without making the program much more complex. Coming soon ;).
@@ -14,6 +15,7 @@ vector<char> PossibleChars{ 's', 'i', 's', 's', 'y', 'h', 'u', 'm', 'p', 'h', 'a
 string green;
 string yellow;
 string red;
+
 
 
 //takes a string as a parameter and returns a char type vector containing that string's lettes.
@@ -57,6 +59,7 @@ vector<string> Colors(string solution, string guess) {
 vector<string> RemainingWords(string solution, string guess, vector<string>RemainingSchmords, int number, bool interactive, vector<string>input) {
     vector<char> Solution(Converter(solution));
     vector<char> Guess(Converter(guess));
+    vector<char>forDebugging = PossibleChars;
     if (number != 1){
         vector<char> T;
         for (int s = 0; s < RemainingSchmords.size(); s++) {
@@ -66,13 +69,17 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
                 T.push_back(tran[t]);
             }
         }
-        PossibleChars = T;
+        forDebugging = T;
     }
     
     //insides will be a for loop for each letter of the word, then a check for what color each letter is, then iterating through what remaining words are left and checking whether they
     //are compatable with the color returned for that individual letter. It is brute forcy, but the list of words it has to check through will decrease each time it does it. 
     //i represents the character in the guess being checked while j represents the word in remaining words vector that it is being checked against.
 
+
+    //something's wrong with this function. It works fine when called to solve for one word, but for some reason when it is called for another word in all 3 of the methods that I try
+    //this in it gives the vector subscript soft error. I now know it is because of passing in PossibleSolutions multiple times. 
+    //The error was resolved. When using global variables, make a local copy to apply changes to.
     vector<string>colors;
     if (!interactive) {
        colors = Colors(solution, guess);
@@ -80,6 +87,7 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
     else if(interactive){
         colors = input;
     }
+    
     for (int i = 0; i < 5; i++) {
         string color = colors[i];
         if (color == "green") {
@@ -87,7 +95,7 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
             vector<char>TempoRemaining;
             for (int j = 0; j < RemainingSchmords.size(); j++) {
                 int position = 5 * j + i;
-                if (PossibleChars[position] == Guess[i]) {
+                if (forDebugging[position] == Guess[i]) {
                     string temp = RemainingSchmords[j];
                     TempRemaining.push_back(temp);
                     vector<char> tempo(temp.begin(), temp.end());
@@ -97,7 +105,9 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
                 }
             }
             RemainingSchmords = TempRemaining;
-            PossibleChars = TempoRemaining;
+            TempRemaining.clear();
+            forDebugging = TempoRemaining;
+            TempoRemaining.clear();
         }
         else if (color == "yellow") {
 
@@ -105,7 +115,7 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
             vector<char> TempoRemaining;
             for (int j = 0; j < RemainingSchmords.size(); j++) {
                 int position = 5 * j;
-                if ((PossibleChars[position] == Guess[i] && PossibleChars[position+i] != Guess[i]) || (PossibleChars[position+1] == Guess[i] && PossibleChars[position+i] != Guess[i]) || (PossibleChars[position+2] == Guess[i] && PossibleChars[position+i] != Guess[i]) || (PossibleChars[position+3] == Guess[i] && PossibleChars[position+i] != Guess[i]) || (PossibleChars[position+4] == Guess[i] && PossibleChars[position+i] != guess[i])) {
+                if ((forDebugging[position] == Guess[i] && forDebugging[position+i] != Guess[i]) || (forDebugging[position+1] == Guess[i] && forDebugging[position+i] != Guess[i]) || (forDebugging[position+2] == Guess[i] && forDebugging[position+i] != Guess[i]) || (forDebugging[position+3] == Guess[i] && forDebugging[position+i] != Guess[i]) || (forDebugging[position+4] == Guess[i] && forDebugging[position+i] != guess[i])) {
                     string temp = RemainingSchmords[j];
                     TempRemaining.push_back(temp);
                     vector<char> tempo(temp.begin(), temp.end());
@@ -115,15 +125,17 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
                 }
             }
             RemainingSchmords = TempRemaining;
-            PossibleChars = TempoRemaining;
+            TempRemaining.clear();
+            forDebugging = TempoRemaining;
+            TempoRemaining.clear();
         }
         else if (color == "red") {
             vector<string> TempRemaining;
             vector<char> TempoRemaining;
             for (int j = 0; j < RemainingSchmords.size(); j++) {
                 int position = 5 * j;
-                if ((PossibleChars[position] != Guess[i]) && (PossibleChars[position+1] != Guess[i]) && (PossibleChars[position+2] != Guess[i]) && (PossibleChars[position+3] != Guess[i]) && (PossibleChars[position+4] != Guess[i])) {
-                    char checker = PossibleChars[position];
+                if ((forDebugging[position] != Guess[i]) && (forDebugging[position+1] != Guess[i]) && (forDebugging[position+2] != Guess[i]) && (forDebugging[position+3] != Guess[i]) && (forDebugging[position+4] != Guess[i])) {
+                    char checker = forDebugging[position];
                     string temp = RemainingSchmords[j];
                     TempRemaining.push_back(temp);
                     vector<char> tempo(temp.begin(), temp.end());
@@ -133,7 +145,9 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
                 }
             }
             RemainingSchmords = TempRemaining;
-            PossibleChars = TempoRemaining;
+            TempRemaining.clear();
+            forDebugging = TempoRemaining;
+            TempoRemaining.clear();
         }
     }
     return RemainingSchmords;
@@ -142,8 +156,10 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
 
 //need to find a way to make it randomly select instead of always doing the first one. 
 void SingleSolver() {
+    srand(time(0));
     string solution;
     bool IsGuessable = false;
+    vector<string> duplicate = PossibleSolutions;
     cout << "What word would you like the bot to solve?" << endl;
     cin >> solution;
     for (int i = 0; i < PossibleSolutions.size(); i++) {
@@ -161,33 +177,39 @@ void SingleSolver() {
         cout << "It was correct! The bot got it in 1 guess." << endl;
         return;
     }
-    vector<string>ty1 = RemainingWords(solution, "raise", PossibleSolutions,1, false, {"filler"});
-    cout << "The bot chose " << ty1[0] << " as its next guess."<<endl;
-    if (ty1[0] == solution) {
+    vector<string>ty1 = RemainingWords(solution, "raise", duplicate, 1, false, {"filler"});
+    string nextAttempt = ty1[rand() % ty1.size()];
+    cout << "The bot chose " << nextAttempt << " as its next guess."<<endl;
+    if (nextAttempt == solution) {
         cout << "That guess was correct! The bot got it in 2 guesses." << endl;
         return;
     }
-    vector<string> ty2 = RemainingWords(solution, ty1[0], ty1, 2, false, {"filler"});
+    vector<string> ty2 = RemainingWords(solution, nextAttempt, ty1, 2, false, {"filler"});
+
+    nextAttempt = ty2[rand() % ty2.size()];
     cout << "The bot chose " << ty2[0] << " as its next guess."<<endl;
     if (ty2[0] == solution) {
         cout << "That guess was correct! The bot got it in 3 guesses." << endl;
         return;
     }
-    vector<string> ty3 = RemainingWords(solution, ty2[0], ty2, 2, false, { "filler" });
-    cout << "The bot chose " << ty3[0] << " as its next guess." << endl;
-    if (ty3[0] == solution) {
+    vector<string> ty3 = RemainingWords(solution, nextAttempt, ty2, 2, false, { "filler" });
+    nextAttempt = ty3[rand() % ty3.size()];
+    cout << "The bot chose " << nextAttempt << " as its next guess." << endl;
+    if (nextAttempt == solution) {
         cout << "That guess was correct! The bot got it in 4 guesses." << endl;
         return;
     }
-    vector<string> ty4 = RemainingWords(solution, ty3[0], ty3, 2, false, { "filler" });
-    cout << "The bot chose " << ty4[0] << " as its next guess." << endl;
-    if (ty4[0] == solution) {
+    vector<string> ty4 = RemainingWords(solution, nextAttempt, ty3, 2, false, { "filler" });
+    nextAttempt = ty4[rand() % ty4.size()];
+    cout << "The bot chose " << nextAttempt << " as its next guess." << endl;
+    if (nextAttempt == solution) {
         cout << "That guess was correct! The bot got it in 5 guesses." << endl;
         return;
     }
-    vector<string> ty5 = RemainingWords(solution, ty4[0], ty4, 2, false, { "filler" });
-    cout << "The bot chose " << ty5[0] << " as its next guess." << endl;
-    if (ty5[0] == solution) {
+    vector<string> ty5 = RemainingWords(solution, nextAttempt, ty4, 2, false, { "filler" });
+    nextAttempt = ty5[rand() % ty5.size()];
+    cout << "The bot chose " << nextAttempt << " as its next guess." << endl;
+    if (nextAttempt == solution) {
         cout << "That guess was correct! The bot got it in 6 guesses." << endl;
         return;
     }
@@ -195,11 +217,12 @@ void SingleSolver() {
         cout << "The bot failed to guess the solution.";
         return;
     }
+    duplicate.clear();
 }
-//something about line 218 is fucked. it works for the first iteration with sissy, but when it gets to the second iteration with humph, it runs into that vector error. 
-void FirstWord() {
-    
-    int limit = 2308;
+//the first run through of the code works perfectly, something happens on line 233 on the second attempt, this is because reinitializing a vector is dumb in c++
+int RandomWord(string currentSolution) {
+    srand(time(0));
+   /* int limit = 2308;
     int NumberOfOnes = 0;
     int NumberOfTwos = 0;
     int NumberOfThrees = 0;
@@ -207,58 +230,104 @@ void FirstWord() {
     int NumberOfFives = 0;
     int NumberOfSixes = 0;
     int NumberOfFails = 0;
-    int sum = 0;
-
-    cout << endl;
+    int sum = 0;*/
+    string randomGuess;
+    int howMany;
+    //string currentSolution;
     
-    int WordsCompleted = limit;
-    for (int i = 0; i <= limit; i++) {
-        if (PossibleSolutions[i] != "raise") {
-            vector<string> ty1 = RemainingWords(PossibleSolutions[i], "raise", PossibleSolutions, 1, false, { "filler" });
-            if (ty1[0] != PossibleSolutions[i]) {
-                vector<string> ty2 = RemainingWords(PossibleSolutions[i], ty1[0], ty1, 2, false, { "filler" });
-                if (ty2[0] != PossibleSolutions[i]) {
-                    vector<string> ty3 = RemainingWords(PossibleSolutions[i], ty2[0], ty2, 3, false, { "filler" });
-                    if (ty3[0] != PossibleSolutions[i]) {
-                        vector<string> ty4 = RemainingWords(PossibleSolutions[i], ty3[0], ty2, 4, false, { "filler" });
-                        if (ty4[0] != PossibleSolutions[i]) {
-                            vector<string> ty5 = RemainingWords(PossibleSolutions[i], ty4[0], ty2, 5, false, { "filler" });
-                            if (ty5[0] != PossibleSolutions[i]) {
-                                NumberOfFails++;
-                                WordsCompleted--;
+
+    //cout << endl;
+    
+    //int WordsCompleted = limit;
+    //for (int i = 1; i < limit; i++) {
+        /*vector<string> tire1;
+        vector<string> tire2;
+        vector<string> tire3;
+        vector<string> tire4;
+        vector<string> tire5;
+        vector<string> breakpoint = PossibleSolutions;*/
+        //currentSolution = PossibleSolutions[i];
+        if (currentSolution != "raise") {
+            vector<string> tire1 = RemainingWords(currentSolution, "crane", PossibleSolutions, 1, false, { "filler" });
+            randomGuess = tire1[rand() % tire1.size()];
+            if (randomGuess != currentSolution) {
+                vector<string> tire2 = RemainingWords(currentSolution, randomGuess, tire1, 2, false, { "filler" });
+                randomGuess = tire2[rand() % tire2.size()];
+                if (randomGuess != currentSolution) {
+                    vector<string> tire3 = RemainingWords(currentSolution, randomGuess, tire2, 3, false, { "filler" });
+                    randomGuess = tire3[rand() % tire3.size()];
+                    if (randomGuess != currentSolution) {
+                        vector<string> tire4 = RemainingWords(currentSolution, randomGuess, tire3, 4, false, { "filler" });
+                        randomGuess = tire4[rand() % tire4.size()];
+                        if (randomGuess != currentSolution) {
+                            vector<string> tire5 = RemainingWords(currentSolution, randomGuess, tire4, 5, false, { "filler" });
+                            randomGuess = tire5[rand() % tire5.size()];
+                            if (randomGuess != currentSolution) {
+                                //NumberOfFails++;
+                                //WordsCompleted--;
+                                howMany = 7;
                             }
                             else {
-                                NumberOfSixes++;
-                                sum = sum + 6;
+                                //NumberOfSixes++;
+                                //sum = sum + 6;
+                                howMany = 6;
                             }
                         }
                         else {
-                            NumberOfFives++;
-                            sum = sum + 5;
+                            //NumberOfFives++;
+                            //sum = sum + 5;
+                            howMany = 5;
                         }
                     }
                     else {
-                        NumberOfFours++;
-                        sum = sum + 4;
+                        //NumberOfFours++;
+                        //sum = sum + 4;
+                        howMany = 4;
                     }
                 }
                 else {
-                    NumberOfThrees++;
-                    sum = sum + 3;
+                    //NumberOfThrees++;
+                    //sum = sum + 3;
+                    howMany = 3;
                 }
             }
             else {
-                NumberOfTwos++;
-                sum = sum + 2;
+                //NumberOfTwos++;
+                //sum = sum + 2;
+                howMany = 2;
             }
         }
         else {
-            NumberOfOnes++;
-            sum = sum + 1;
+            //NumberOfOnes++;
+            //sum = sum + 1;
+            howMany = 1;
         }
-    }
+       /* tire1.clear();
+        tire2.clear();
+        tire3.clear();
+        tire4.clear();
+        tire5.clear();
+        tire1.reserve(2308);
+        tire2.reserve(2308);
+        tire3.reserve(2308);
+        tire4.reserve(2308);
+        tire5.reserve(2308);*/
+
+        return howMany;
+
+        /*ty1.clear();
+        ty2.clear();
+        ty3.clear();
+        ty4.clear();
+        ty5.clear();
+        ty1.shrink_to_fit();
+        ty2.shrink_to_fit();
+        ty3.shrink_to_fit();
+        ty4.shrink_to_fit();
+        ty5.shrink_to_fit();
+    }*/
     
-    cout << "The results were as follows: " << endl;
+    /*cout << "The results were as follows: " << endl;
     cout << "Number of 1s: " << NumberOfOnes << endl;
     cout << "Number of 2s: " << NumberOfTwos << endl;
     cout << "Number of 3s: " << NumberOfThrees << endl;
@@ -270,7 +339,7 @@ void FirstWord() {
     double average = sum / WordsCompleted;
     cout << "The average number of guesses for completed words was: " << average << endl;
     double PercentCompleted = (WordsCompleted / limit) * 100;
-    cout << "The percent of words completed was: " << PercentCompleted;
+    cout << "The percent of words completed was: " << PercentCompleted;*/
 
 }
 //The method that performs the first feature.
@@ -282,16 +351,17 @@ void InteractiveHelper() {
     string color4;
     string color5;
     string winner;
+    vector<string> clone = PossibleSolutions;
     cout << "This is the Solving Assistant. It will tell you all of the remaining possible solutions to your daily wordle. ";
-    cout << "What will your first guess be?" << endl;
+    cout << endl << "What will your first guess be?" << endl;
     cin >> guess1;
     cout << "Did you get it? yes or no?"<<endl;
     cin >> winner;
     if (winner == "yes") {
-        cout << "Good job you defintely didn't cheat!";
+        cout << endl << endl << "Good job you defintely didn't cheat!";
         return;
     }
-    cout << "Enter the first color as green, yellow, or red" << endl;
+    cout << endl << "Enter the first color as green, yellow, or red" << endl;
     cin >> color1;
     cout << "Enter the second color as green, yellow, or red" << endl;
     cin >> color2;
@@ -302,20 +372,20 @@ void InteractiveHelper() {
     cout << "Enter the fifth color as green, yellow, or red" << endl;
     cin >> color5;
     vector<string> inputted{ color1,color2,color3,color4,color5 };
-    vector<string> List1 = RemainingWords("sucks", guess1, PossibleSolutions, 1, true, inputted);
-    cout << "The remaining possible solutions are: ";
+    vector<string> List1 = RemainingWords("sucks", guess1, clone, 1, true, inputted);
+    cout << "The remaining possible solutions are:" << endl << endl;
     for (int a = 0; a < List1.size(); a++) {
         cout << List1[a]<<" ";
     }
-    cout << "What will your second guess be?" << endl;
+    cout << endl << endl << "What will your second guess be?" << endl;
     cin >> guess1;
-    cout << "Did you get it? yes or no?"<<endl;
+    cout << endl << "Did you get it? yes or no?"<<endl;
     cin >> winner;
     if (winner == "yes") {
-        cout << "Good job you got it in 2 guesses!";
+        cout << endl << endl << "Good job you got it in 2 guesses!";
         return;
     }
-    cout << "Enter the first color as green, yellow, or red" << endl;
+    cout << endl << "Enter the first color as green, yellow, or red" << endl;
     cin >> color1;
     cout << "Enter the second color as green, yellow, or red" << endl;
     cin >> color2;
@@ -327,19 +397,19 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List2 = RemainingWords("sucks", guess1, List1, 2, true, inputted);
-    cout << "The remaining possible solutions are: ";
+    cout << "The remaining possible solutions are:" << endl;
     for (int a = 0; a < List2.size(); a++) {
         cout << List2[a] << " ";
     }
-    cout << "What will your third guess be?"<< endl;
+    cout << endl << endl << "What will your third guess be?"<< endl;
     cin >> guess1;
-    cout << "Did you get it? yes or no?" << endl;;
+    cout << endl << "Did you get it? yes or no?" << endl;;
     cin >> winner;
     if (winner == "yes") {
-        cout << "Good job you got it in 3 guesses!";
+        cout << endl << endl << "Good job you got it in 3 guesses!";
         return;
     }
-    cout << "Enter the first color as green, yellow, or red" << endl;
+    cout << endl << "Enter the first color as green, yellow, or red" << endl;
     cin >> color1;
     cout << "Enter the second color as green, yellow, or red" << endl;
     cin >> color2;
@@ -351,19 +421,19 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List3 = RemainingWords("sucks", guess1, List2, 2, true, inputted);
-    cout << "The remaining possible solutions are: ";
+    cout << "The remaining possible solutions are:" << endl;
     for (int a = 0; a < List3.size(); a++) {
         cout << List3[a] << " ";
     }
-    cout << "What will your fourth guess be?" << endl;
+    cout << endl << endl << "What will your fourth guess be?" << endl;
     cin >> guess1;
-    cout << "Did you get it? yes or no?"<<endl;
+    cout << endl << "Did you get it? yes or no?"<<endl;
     cin >> winner;
     if (winner == "yes") {
-        cout << "Good job you got it in 4 guesses!";
+        cout << endl << endl << "Good job you got it in 4 guesses!";
         return;
     }
-    cout << "Enter the first color as green, yellow, or red" << endl;
+    cout << endl << "Enter the first color as green, yellow, or red" << endl;
     cin >> color1;
     cout << "Enter the second color as green, yellow, or red" << endl;
     cin >> color2;
@@ -375,19 +445,19 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List4 = RemainingWords("sucks", guess1, List3, 2, true, inputted);
-    cout << "The remaining possible solutions are: ";
+    cout << "The remaining possible solutions are:" << endl;
     for (int a = 0; a < List4.size(); a++) {
         cout << List4[a] << " ";
     }
-    cout << "What will your fifth guess be?" << endl;
+    cout << endl << endl << "What will your fifth guess be?" << endl ;
     cin >> guess1;
-    cout << "Did you get it? yes or no?"<<endl;
+    cout << endl << "Did you get it? yes or no?"<<endl;
     cin >> winner;
     if (winner == "yes") {
-        cout << "Good job you got it in 5 guesses!";
+        cout << endl << endl << "Good job you got it in 5 guesses!";
         return;
     }
-    cout << "Enter the first color as green, yellow, or red" << endl;
+    cout << endl << "Enter the first color as green, yellow, or red" << endl;
     cin >> color1;
     cout << "Enter the second color as green, yellow, or red" << endl;
     cin >> color2;
@@ -399,16 +469,16 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List5 = RemainingWords("sucks", guess1, List4, 2, true, inputted);
-    cout << "The remaining possible solutions are: ";
+    cout << "The remaining possible solutions are:" << endl;
     for (int a = 0; a < List5.size(); a++) {
         cout << List5[a] << " ";
     }
-    cout << "What will your sixth guess be?" << endl;
+    cout << endl << endl << "What will your sixth guess be?" << endl;
     cin >> guess1;
-    cout << "Did you get it? yes or no?"<<endl;
+    cout << endl << "Did you get it? yes or no?"<<endl;
     cin >> winner;
     if (winner == "yes") {
-        cout << "Good job you really cut it close!";
+        cout << endl << endl << "Good job you really cut it close!";
         return;
     }
     else {
@@ -424,25 +494,78 @@ void InteractiveHelper() {
 //I'm just going to have it prompt the user for which feature they want and then funnel them to the correct function with a simple switch statement.
 int main() {
     int control;
-    string SingleSolved;
-    cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works. More features coming soon!" << endl;
+    
+    cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works." << endl << "More features coming soon!" << endl;
     cout << "Enter the number corresponding to what feature you would like to use." << endl; 
     cout << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
     cout << "2 - Single Word Solver: The bot solves a provided word, outputting each guess and how man guesses it took" << endl;
-    cout << "3 - First Word Method Solver: The bot will solve the inputted number of words by choosing the first possible word." << endl << "The statistics from it's run will be displayed." << endl;
+    cout << "3 - Random Word Method Solver: The bot will solve the inputted number of words by choosing a random possible word." << endl << "The statistics from it's run will be displayed." << endl;
     cin >> control;
     switch (control) {
     default:
         cout << "Invalid choice, please enter one of the numbers seen above.";
         cin >> control;
     case 1:
-        InteractiveHelper();
+        for (int i = 0; i < 2; i++) {
+            InteractiveHelper();
+        }
         break;
     case 2:
-        SingleSolver();
+        for (int i = 0; i < 2; i++) {
+            SingleSolver();
+        }
         break;
     case 3:
-        FirstWord();
+        double NumberOfOnes = 0;
+        double NumberOfTwos = 0;
+        double NumberOfThrees = 0;
+        double NumberOfFours = 0;
+        double NumberOfFives = 0;
+        double NumberOfSixes = 0;
+        double NumberOfFails = 0;
+        double sum = 0;
+        double average;
+        double instance;
+        for (int word = 0; word < PossibleSolutions.size(); word++) {
+            instance = RandomWord(PossibleSolutions[word]);
+            if (instance == 1) {
+                NumberOfOnes++;
+            }
+            else if (instance == 2) {
+                NumberOfTwos++;
+            }
+            else if (instance == 3) {
+                NumberOfThrees++;
+            }
+            else if (instance == 4) {
+                NumberOfFours++;
+            }
+            else if (instance == 5) {
+                NumberOfFives++;
+            }
+            else if (instance == 6) {
+                NumberOfSixes++;
+            }
+            else {
+                NumberOfFails++;
+            }
+            sum += instance;        
+        }
+
+        average = sum / PossibleSolutions.size();
+
+        cout << "The results were as follows: " << endl;
+        cout << "Number of 1s: " << NumberOfOnes << endl;
+        cout << "Number of 2s: " << NumberOfTwos << endl;
+        cout << "Number of 3s: " << NumberOfThrees << endl;
+        cout << "Number of 4s: " << NumberOfFours << endl;
+        cout << "Number of 5s: " << NumberOfFives << endl;
+        cout << "Number of 6s: " << NumberOfSixes << endl;
+        cout << "Number of fails: " << NumberOfFails << endl << endl;
+        cout << "The average number of guesses for completed words was: " << average << endl;
+        double PercentCompleted = 100 - (NumberOfFails / PossibleSolutions.size() * 100);
+        cout << "The percent of words completed was: " << PercentCompleted;
+
         break;
     }
 }
