@@ -47,6 +47,34 @@ vector<string> Colors(string solution, string guess) {
     return colors;
 }
 
+bool isViableWord(string toBeChecked) {
+    bool viable = false;
+    for (int i = 0; i < PossibleSolutions.size(); i++) {
+        if (PossibleSolutions[i] == toBeChecked) {
+            viable = true;
+        }
+    }
+    return viable;
+}
+
+bool doubleLetter(string toBeChecked) {
+    bool hasDoubleLetters = false;
+    vector <char> letters = Converter(toBeChecked);
+    if ((letters[0] == letters[1]) || (letters[0] == letters[2]) || (letters[0] == letters[3]) || (letters[0] == letters[4]) || (letters[1] == letters[2]) || (letters[1] == letters[3]) || (letters[1] == letters[4]) || (letters[2] == letters[3]) || (letters[2] == letters[4]) || (letters[3] == letters[4])) {
+        hasDoubleLetters = true;
+    }
+    return hasDoubleLetters;
+}
+
+//needs some work
+bool consoleViable(char console) {
+    bool yet = false;
+    if ((console == 1) || (console == 2) || (console == 3) || (console == 4)) {
+        yet = true;
+    }
+    return yet;
+}
+
 
 
 //The main workhorse method and the most difficult to write. The parameters are confusing, so here's the explanation:
@@ -219,36 +247,19 @@ void SingleSolver() {
     }
     duplicate.clear();
 }
-//the first run through of the code works perfectly, something happens on line 233 on the second attempt, this is because reinitializing a vector is dumb in c++
-int RandomWord(string currentSolution) {
-    srand(time(0));
-   /* int limit = 2308;
-    int NumberOfOnes = 0;
-    int NumberOfTwos = 0;
-    int NumberOfThrees = 0;
-    int NumberOfFours = 0;
-    int NumberOfFives = 0;
-    int NumberOfSixes = 0;
-    int NumberOfFails = 0;
-    int sum = 0;*/
-    string randomGuess;
-    int howMany;
-    //string currentSolution;
-    
 
-    //cout << endl;
+
+
+
+//the first run through of the code works perfectly, something happens on line 233 on the second attempt, this is because reinitializing a vector is dumb in c++
+double RandomWord(string firstWord, string currentSolution) {
+    srand(time(0));
+    double HowMany;
     
-    //int WordsCompleted = limit;
-    //for (int i = 1; i < limit; i++) {
-        /*vector<string> tire1;
-        vector<string> tire2;
-        vector<string> tire3;
-        vector<string> tire4;
-        vector<string> tire5;
-        vector<string> breakpoint = PossibleSolutions;*/
-        //currentSolution = PossibleSolutions[i];
-        if (currentSolution != "raise") {
-            vector<string> tire1 = RemainingWords(currentSolution, "crane", PossibleSolutions, 1, false, { "filler" });
+    string randomGuess;
+
+        if (currentSolution != firstWord) {
+            vector<string> tire1 = RemainingWords(currentSolution, firstWord, PossibleSolutions, 1, false, { "filler" });
             randomGuess = tire1[rand() % tire1.size()];
             if (randomGuess != currentSolution) {
                 vector<string> tire2 = RemainingWords(currentSolution, randomGuess, tire1, 2, false, { "filler" });
@@ -263,85 +274,95 @@ int RandomWord(string currentSolution) {
                             vector<string> tire5 = RemainingWords(currentSolution, randomGuess, tire4, 5, false, { "filler" });
                             randomGuess = tire5[rand() % tire5.size()];
                             if (randomGuess != currentSolution) {
-                                //NumberOfFails++;
-                                //WordsCompleted--;
-                                howMany = 7;
+                                HowMany = 7;
                             }
                             else {
-                                //NumberOfSixes++;
-                                //sum = sum + 6;
-                                howMany = 6;
+                                HowMany = 6;
                             }
                         }
                         else {
-                            //NumberOfFives++;
-                            //sum = sum + 5;
-                            howMany = 5;
+                            HowMany = 5;
                         }
                     }
                     else {
-                        //NumberOfFours++;
-                        //sum = sum + 4;
-                        howMany = 4;
+                        HowMany = 4;
                     }
                 }
                 else {
-                    //NumberOfThrees++;
-                    //sum = sum + 3;
-                    howMany = 3;
+                    HowMany = 3;
                 }
             }
             else {
-                //NumberOfTwos++;
-                //sum = sum + 2;
-                howMany = 2;
+                HowMany = 2;
             }
         }
         else {
-            //NumberOfOnes++;
-            //sum = sum + 1;
-            howMany = 1;
+            HowMany = 1;
         }
-       /* tire1.clear();
-        tire2.clear();
-        tire3.clear();
-        tire4.clear();
-        tire5.clear();
-        tire1.reserve(2308);
-        tire2.reserve(2308);
-        tire3.reserve(2308);
-        tire4.reserve(2308);
-        tire5.reserve(2308);*/
-
-        return howMany;
-
-        /*ty1.clear();
-        ty2.clear();
-        ty3.clear();
-        ty4.clear();
-        ty5.clear();
-        ty1.shrink_to_fit();
-        ty2.shrink_to_fit();
-        ty3.shrink_to_fit();
-        ty4.shrink_to_fit();
-        ty5.shrink_to_fit();
-    }*/
-    
-    /*cout << "The results were as follows: " << endl;
-    cout << "Number of 1s: " << NumberOfOnes << endl;
-    cout << "Number of 2s: " << NumberOfTwos << endl;
-    cout << "Number of 3s: " << NumberOfThrees << endl;
-    cout << "Number of 4s: " << NumberOfFours << endl;
-    cout << "Number of 5s: " << NumberOfFives << endl;
-    cout << "Number of 6s: " << NumberOfSixes << endl;
-    cout << "Number of fails: " << NumberOfFails << endl << endl;
-
-    double average = sum / WordsCompleted;
-    cout << "The average number of guesses for completed words was: " << average << endl;
-    double PercentCompleted = (WordsCompleted / limit) * 100;
-    cout << "The percent of words completed was: " << PercentCompleted;*/
-
+    return HowMany;
 }
+
+
+//I don't know the best way to handle fails yet, so I'm going to make them equivalent to getting it in 7 guesses for now.
+//This thing actually takes forver, so I'm going to elminate all words with double letters in them. 
+string BestStartingWord() {
+    string bestWord;
+    double bestAverage = 7;
+    for (int i = 0; i < PossibleSolutions.size(); i++) {
+        cout << i + 1 << ", ";
+        bool doubleLetters = doubleLetter(PossibleSolutions[i]);
+        if (doubleLetters == false) {
+            double numberOfOnes = 0;
+            double numberOfTwos = 0;
+            double numberOfThrees = 0;
+            double numberOfFours = 0;
+            double numberOfFives = 0;
+            double numberOfSixes = 0;
+            double numberOfFails = 0;
+            double Sum = 0;
+            double wordsCompleted = PossibleSolutions.size();
+            for (int j = 0; j < PossibleSolutions.size(); j++) {
+                double HowMany = RandomWord(PossibleSolutions[i], PossibleSolutions[j]);
+                if (HowMany == 1) {
+                    numberOfOnes++;
+                    Sum += 1;
+                }
+                else if (HowMany == 2) {
+                    numberOfTwos++;
+                    Sum += 2;
+                }
+                else if (HowMany == 3) {
+                    numberOfThrees++;
+                    Sum += 3;
+                }
+                else if (HowMany == 4) {
+                    numberOfFours++;
+                    Sum += 4;
+                }
+                else if (HowMany == 5) {
+                    numberOfFives++;
+                    Sum += 5;
+                }
+                else if (HowMany == 6) {
+                    numberOfSixes++;
+                    Sum += 6;
+                }
+                else {
+                    numberOfFails++;
+                    Sum += 7;
+                }
+            }
+            double Average = Sum / wordsCompleted;
+            if (Average < bestAverage) {
+                bestAverage = Average;
+                bestWord = PossibleSolutions[i];
+            }
+        }
+    }
+    return bestWord;
+}
+
+
 //The method that performs the first feature.
 void InteractiveHelper() {
     string guess1;
@@ -493,68 +514,88 @@ void InteractiveHelper() {
 //This is the main method. It is the control panel where everything is called. 
 //I'm just going to have it prompt the user for which feature they want and then funnel them to the correct function with a simple switch statement.
 int main() {
+
+    //this is all for feature three because for some reason it doesn't like case instance variables.
+    string firstWord;
+    int consoleCounter = 0;
+    double NumberOfOnes = 0;
+    double NumberOfTwos = 0;
+    double NumberOfThrees = 0;
+    double NumberOfFours = 0;
+    double NumberOfFives = 0;
+    double NumberOfSixes = 0;
+    double NumberOfFails = 0;
+    double sum = 0;
+    double WordsCompleted = PossibleSolutions.size();
+    double average;
+    double PercentCompleted;
+
     int control;
-    
     cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works." << endl << "More features coming soon!" << endl;
-    cout << "Enter the number corresponding to what feature you would like to use." << endl; 
+    cout << "Enter the number corresponding to what feature you would like to use." << endl;
     cout << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
     cout << "2 - Single Word Solver: The bot solves a provided word, outputting each guess and how man guesses it took" << endl;
-    cout << "3 - Random Word Method Solver: The bot will solve the inputted number of words by choosing a random possible word." << endl << "The statistics from it's run will be displayed." << endl;
+    cout << "3 - Random Word Method Solver: The bot will use your starting word to solve for all solutions by choosing a random" << endl << "possible word. The statistics from it's run will be displayed." << endl;
+    cout << "4 - Best Starting Word: Applies feature three to all the solutions to find the best starting word." << endl;
     cin >> control;
+   
     switch (control) {
-    default:
-        cout << "Invalid choice, please enter one of the numbers seen above.";
-        cin >> control;
     case 1:
         for (int i = 0; i < 2; i++) {
             InteractiveHelper();
         }
         break;
     case 2:
-        for (int i = 0; i < 2; i++) {
-            SingleSolver();
-        }
+        SingleSolver();
         break;
     case 3:
-        double NumberOfOnes = 0;
-        double NumberOfTwos = 0;
-        double NumberOfThrees = 0;
-        double NumberOfFours = 0;
-        double NumberOfFives = 0;
-        double NumberOfSixes = 0;
-        double NumberOfFails = 0;
-        double sum = 0;
-        double average;
-        double instance;
+        
+
+        cout << "What starting word do want the machine to use? Stare is my suggestion." << endl;
+        cin >> firstWord;
+        while (Converter(firstWord).size() != 5) {
+            cout << "Not a viable option. Pick a different word." << endl;
+            cin >> firstWord;
+        }
+        cout << endl << "This will take between 30 and 90 seconds depending on starting word." << endl << endl;
+
         for (int word = 0; word < PossibleSolutions.size(); word++) {
-            instance = RandomWord(PossibleSolutions[word]);
-            if (instance == 1) {
+            if (word % 121 == 0) {
+                consoleCounter += 5;
+                cout << consoleCounter << "% ";
+            }
+            double howMany = RandomWord(firstWord, PossibleSolutions[word]);
+            if (howMany == 1) {
                 NumberOfOnes++;
+                sum += 1;
             }
-            else if (instance == 2) {
+            else if (howMany == 2) {
                 NumberOfTwos++;
+                sum += 2;
             }
-            else if (instance == 3) {
+            else if (howMany == 3) {
                 NumberOfThrees++;
+                sum += 3;
             }
-            else if (instance == 4) {
+            else if (howMany == 4) {
                 NumberOfFours++;
+                sum += 4;
             }
-            else if (instance == 5) {
+            else if (howMany == 5) {
                 NumberOfFives++;
+                sum += 5;
             }
-            else if (instance == 6) {
+            else if (howMany == 6) {
                 NumberOfSixes++;
+                sum += 6;
             }
             else {
                 NumberOfFails++;
+                WordsCompleted--;
             }
-            sum += instance;        
         }
 
-        average = sum / PossibleSolutions.size();
-
-        cout << "The results were as follows: " << endl;
+        cout << endl << endl << "The results were as follows: " << endl;
         cout << "Number of 1s: " << NumberOfOnes << endl;
         cout << "Number of 2s: " << NumberOfTwos << endl;
         cout << "Number of 3s: " << NumberOfThrees << endl;
@@ -562,10 +603,17 @@ int main() {
         cout << "Number of 5s: " << NumberOfFives << endl;
         cout << "Number of 6s: " << NumberOfSixes << endl;
         cout << "Number of fails: " << NumberOfFails << endl << endl;
+
+        average = sum/WordsCompleted;
         cout << "The average number of guesses for completed words was: " << average << endl;
-        double PercentCompleted = 100 - (NumberOfFails / PossibleSolutions.size() * 100);
+        PercentCompleted = 100 - (1 - WordsCompleted / PossibleSolutions.size())*100;
         cout << "The percent of words completed was: " << PercentCompleted;
 
+        break;
+
+    case 4:
+        cout << "This will take forever." << endl << endl;
+        cout << "The best starting word is: " << BestStartingWord() << ".";
         break;
     }
 }
