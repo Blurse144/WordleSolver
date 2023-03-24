@@ -18,6 +18,28 @@ string red;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //takes a string as a parameter and returns a char type vector containing that string's lettes.
 vector<char> Converter(string convertee) {
     vector<char> v(convertee.begin(), convertee.end());
@@ -115,7 +137,7 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
     else if(interactive){
         colors = input;
     }
-    
+    vector<string> strictlyDebug = colors;
     for (int i = 0; i < 5; i++) {
         string color = colors[i];
         if (color == "green") {
@@ -179,6 +201,27 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
         }
     }
     return RemainingSchmords;
+}
+
+
+string findBestWord1(vector<string> words) {
+    int leastWords = words.size();
+    if (leastWords == 1) {
+        return words[0];
+    }
+    string guess;
+    int sum = 0;
+    for (int i = 0; i < words.size(); i++) {
+        for (int j = 0; j < words.size(); j++) {
+            vector<string> temp = RemainingWords(words[j], words[i], words, 1, false, { "filler" });
+            sum += temp.size();
+        }
+        int average = sum / words.size();
+        if (average < leastWords) {
+            guess = words[i];
+        }
+    }
+    return guess;
 }
 
 
@@ -249,9 +292,6 @@ void SingleSolver() {
 }
 
 
-
-
-//the first run through of the code works perfectly, something happens on line 233 on the second attempt, this is because reinitializing a vector is dumb in c++
 double RandomWord(string firstWord, string currentSolution) {
     srand(time(0));
     double HowMany;
@@ -508,7 +548,42 @@ void InteractiveHelper() {
     }
 }
 
+//solves by choosing the word that will result in the lowest number of average words remaining
+int SmartSolver(string solution) {
+    if (solution == "raise") {
+        return 1;
+    }
+    string guess;
+    vector<string> time1 = RemainingWords(solution, "raise", PossibleSolutions, 1, false, { "filler" });
+    guess = findBestWord1(time1);
+    if (guess == solution) {
+        return 2;
+    }
+    vector<string> time2 = RemainingWords(solution, guess, time1, 2, false, { "filler" });
+    guess = findBestWord1(time2);
+    if (guess == solution) {
+        return 3;
+    }
+    vector<string> time3 = RemainingWords(solution, guess, time2, 3, false, { "filler" });
+    guess = findBestWord1(time3);
+    if (guess == solution) {
+        return 4;
+    }
+    vector<string> time4 = RemainingWords(solution, guess, time3, 4, false, { "filler" });
+    guess = findBestWord1(time4);
+    if (guess == solution) {
+        return 5; 
+    }
+    vector<string> time5 = RemainingWords(solution, guess, time4, 5, false, { "filler" });
+    guess = findBestWord1(time5);
+    if (guess == solution) {
+        return 6;
+    }
 
+    else {
+        return 7;
+    }
+}
 
 
 //This is the main method. It is the control panel where everything is called. 
@@ -517,6 +592,7 @@ int main() {
 
     //this is all for feature three because for some reason it doesn't like case instance variables.
     string firstWord;
+    string word;
     int consoleCounter = 0;
     double NumberOfOnes = 0;
     double NumberOfTwos = 0;
@@ -531,33 +607,31 @@ int main() {
     double PercentCompleted;
 
     int control;
-    cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works." << endl << "More features coming soon!" << endl;
+  //cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works." << endl << "More features coming soon!" << endl;
     cout << "Enter the number corresponding to what feature you would like to use." << endl;
     cout << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
     cout << "2 - Single Word Solver: The bot solves a provided word, outputting each guess and how man guesses it took" << endl;
     cout << "3 - Random Word Method Solver: The bot will use your starting word to solve for all solutions by choosing a random" << endl << "possible word. The statistics from it's run will be displayed." << endl;
     cout << "4 - Best Starting Word: Applies feature three to all the solutions to find the best starting word." << endl;
+    cout << "5 - Maximum Performance: Applies my best algorithm to each possible solution and provides statistics about its findings." << endl;
     cin >> control;
    
-    switch (control) {
-    case 1:
-        for (int i = 0; i < 2; i++) {
-            InteractiveHelper();
-        }
-        break;
-    case 2:
-        SingleSolver();
-        break;
-    case 3:
-        
-
+    if (control == 1) {
+        InteractiveHelper();
+    }
+    else if (control == 2) {
+        cout << endl << "What word would you like the bot to solve?" << endl;
+        cin >> word;
+        cout << endl << "It took the bot " << SmartSolver(word) << " guesses.";
+    }   
+    else if (control == 3) {
         cout << "What starting word do want the machine to use? Stare is my suggestion." << endl;
         cin >> firstWord;
         while (Converter(firstWord).size() != 5) {
             cout << "Not a viable option. Pick a different word." << endl;
             cin >> firstWord;
         }
-        cout << endl << "This will take between 30 and 90 seconds depending on starting word." << endl << endl;
+        cout << endl << "This could take some time." << endl << endl;
 
         for (int word = 0; word < PossibleSolutions.size(); word++) {
             if (word % 121 == 0) {
@@ -604,17 +678,42 @@ int main() {
         cout << "Number of 6s: " << NumberOfSixes << endl;
         cout << "Number of fails: " << NumberOfFails << endl << endl;
 
-        average = sum/WordsCompleted;
+        average = sum / WordsCompleted;
         cout << "The average number of guesses for completed words was: " << average << endl;
-        PercentCompleted = 100 - (1 - WordsCompleted / PossibleSolutions.size())*100;
+        PercentCompleted = 100 - (1 - WordsCompleted / PossibleSolutions.size()) * 100;
         cout << "The percent of words completed was: " << PercentCompleted;
 
-        break;
+    }
 
-    case 4:
+    else if (control == 4) {
         cout << "This will take forever." << endl << endl;
         cout << "The best starting word is: " << BestStartingWord() << ".";
-        break;
+    }
+   
+    else if (control == 5){
+        srand(time(0));
+        cout << "This could take a while." << endl << endl;
+        double sum = 0;
+        double percent = 0;
+        vector<string> clone = PossibleSolutions;
+        vector<string> sample;
+        for (int samples = 0; samples < 3; samples++) {
+            for (int ran = 0; ran < 33; ran++) {
+                int index = rand() % clone.size();
+                sample.push_back(clone[index]);
+                clone.erase(clone.begin() + index);
+            }
+            for (int i = 0; i < sample.size(); i++) {
+                percent += 100 / sample.size();
+                cout << percent << "% ";
+                sum += SmartSolver(sample[i]);
+            }
+            double average = sum / sample.size();
+            cout << endl << "The average number of guesses was " << average << "." << endl;
+            sample.clear();
+            percent = 0;
+            sum = 0;
+        }
     }
 }
 
