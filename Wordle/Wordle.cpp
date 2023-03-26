@@ -15,7 +15,7 @@ vector<char> PossibleChars{ 's', 'i', 's', 's', 'y', 'h', 'u', 'm', 'p', 'h', 'a
 string green;
 string yellow;
 string red;
-
+vector<string> guesses;
 
 
 
@@ -98,6 +98,31 @@ bool consoleViable(char console) {
 }
 
 
+//thanks chagptington
+bool fourValuesEqual(vector<string>& vec) {
+    int count = 0;
+    for (int i = 0; i < vec.size(); i++) {
+        if (vec[i] == "green") {
+            count++;
+        }
+    }
+    return count == 4;
+}
+
+int whichSpot(vector<string> colors) {
+    for (int i = 0; i < colors.size(); i++) {
+    int count = 0;
+    for (int j = 0; j < colors.size(); j++) {
+        if (colors[i] != colors[j]) {
+             count++;
+             }
+        }
+        if (count != 1) {
+            return i;
+        }
+    }
+    return 0;
+}
 
 //The main workhorse method and the most difficult to write. The parameters are confusing, so here's the explanation:
 //solution is not actually used in Version 1.0.0, but it will defintely be used later when I implement the automatic solver features.
@@ -141,8 +166,8 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
     for (int i = 0; i < 5; i++) {
         string color = colors[i];
         if (color == "green") {
-            vector<string>TempRemaining;
-            vector<char>TempoRemaining;
+            vector<string> TempRemaining;
+            vector<char> TempoRemaining;
             for (int j = 0; j < RemainingSchmords.size(); j++) {
                 int position = 5 * j + i;
                 if (forDebugging[position] == Guess[i]) {
@@ -204,6 +229,33 @@ vector<string> RemainingWords(string solution, string guess, vector<string>Remai
 }
 
 
+string wordsWithLetters(vector<char> letters) {
+    string ret;
+    int toBeat = 0;
+    for (int i = 0; i < PossibleSolutions.size(); i++) {
+        string temp = PossibleSolutions[i];
+        vector<char> comp(temp.begin(), temp.end());
+        int count = 0;
+        vector<char> temperer = letters;
+        for (int j = letters.size() - 1; j >= 0; j--) {
+            for (int k = 0; k < comp.size(); k++) {
+                if (letters[j] == comp[k]) {
+                    count++;
+                    letters.erase(letters.begin() + j);
+                    break;
+                }
+            }
+        }
+        letters = temperer;
+        if(count > toBeat){
+            toBeat = count;
+            ret = PossibleSolutions[i];
+        }
+    }
+    return ret;
+}
+
+
 string findBestWord1(vector<string> words) {
     int leastWords = words.size();
     if (leastWords == 1) {
@@ -217,9 +269,16 @@ string findBestWord1(vector<string> words) {
             sum += temp.size();
         }
         int average = sum / words.size();
+
+        //double letters are bad generally so I discouraged them a bit
+        if (doubleLetter(words[i]) && words.size() > 8) {
+            average = average * 1.25;
+        }
         if (average < leastWords) {
             guess = words[i];
+            leastWords = average;
         }
+        sum = 0;
     }
     return guess;
 }
@@ -550,32 +609,88 @@ void InteractiveHelper() {
 
 //solves by choosing the word that will result in the lowest number of average words remaining
 int SmartSolver(string solution) {
+    vector<string> coloures;
     if (solution == "raise") {
         return 1;
     }
+    guesses.push_back("raise");
     string guess;
-    vector<string> time1 = RemainingWords(solution, "raise", PossibleSolutions, 1, false, { "filler" });
-    guess = findBestWord1(time1);
+    coloures = Colors(solution, "raise");
+    vector<string> time1 = RemainingWords(solution, "raise", PossibleSolutions, 1, true, coloures);
+    if (fourValuesEqual(coloures) && time1.size() > 2) {
+        vector<char> param;
+        int spot = whichSpot(coloures);
+        for (int i = 0; i < time1.size(); i++) {
+            vector<char> temp(time1[i].begin(), time1[i].end());
+            param.push_back(temp[spot]);
+        }
+        guess = wordsWithLetters(param);
+    }
+    else {
+        guess = findBestWord1(time1);
+    }
+    guesses.push_back(guess);
     if (guess == solution) {
         return 2;
     }
-    vector<string> time2 = RemainingWords(solution, guess, time1, 2, false, { "filler" });
-    guess = findBestWord1(time2);
+    coloures = Colors(solution, guess);
+    vector<string> time2 = RemainingWords(solution, guess, time1, 2, true, coloures);
+    if (fourValuesEqual(coloures) && time2.size() > 2) {
+        vector<char> param;
+        int spot = whichSpot(coloures);
+        for (int i = 0; i < time2.size(); i++) {
+            vector<char> temp(time2[i].begin(), time2[i].end());
+            param.push_back(temp[spot]);
+        }
+        guess = wordsWithLetters(param);
+    }
+    else {
+        guess = findBestWord1(time2);
+    }
+    guesses.push_back(guess);
     if (guess == solution) {
         return 3;
     }
-    vector<string> time3 = RemainingWords(solution, guess, time2, 3, false, { "filler" });
-    guess = findBestWord1(time3);
+    coloures = Colors(solution, guess);
+    vector<string> time3 = RemainingWords(solution, guess, time2, 3, true, coloures);
+    if (fourValuesEqual(coloures) && time3.size() > 2) {
+        vector<char> param;
+        int spot = whichSpot(coloures);
+        for (int i = 0; i < time3.size(); i++) {
+            vector<char> temp(time3[i].begin(), time3[i].end());
+            param.push_back(temp[spot]);
+        }
+        guess = wordsWithLetters(param);
+    }
+    else {
+        guess = findBestWord1(time3);
+    }
+    guesses.push_back(guess);
     if (guess == solution) {
         return 4;
     }
-    vector<string> time4 = RemainingWords(solution, guess, time3, 4, false, { "filler" });
-    guess = findBestWord1(time4);
+    coloures = Colors(solution, guess);
+    vector<string> time4 = RemainingWords(solution, guess, time3, 4, true, coloures);
+    if (fourValuesEqual(coloures) && time4.size() > 2) {
+        vector<char> param;
+        int spot = whichSpot(coloures);
+        for (int i = 0; i < time4.size(); i++) {
+            vector<char> temp(time4[i].begin(), time4[i].end());
+            param.push_back(temp[spot]);
+        }
+        guess = wordsWithLetters(param);
+    }
+    else {
+        guess = findBestWord1(time4);
+    }
+    guesses.push_back(guess);
     if (guess == solution) {
         return 5; 
     }
-    vector<string> time5 = RemainingWords(solution, guess, time4, 5, false, { "filler" });
+    coloures = Colors(solution, guess);
+    vector<string> time5 = RemainingWords(solution, guess, time4, 5, true, coloures);
     guess = findBestWord1(time5);
+    guesses.push_back(guess);
     if (guess == solution) {
         return 6;
     }
@@ -590,23 +705,8 @@ int SmartSolver(string solution) {
 //I'm just going to have it prompt the user for which feature they want and then funnel them to the correct function with a simple switch statement.
 int main() {
 
-    //this is all for feature three because for some reason it doesn't like case instance variables.
-    string firstWord;
-    string word;
     int consoleCounter = 0;
-    double NumberOfOnes = 0;
-    double NumberOfTwos = 0;
-    double NumberOfThrees = 0;
-    double NumberOfFours = 0;
-    double NumberOfFives = 0;
-    double NumberOfSixes = 0;
-    double NumberOfFails = 0;
-    double sum = 0;
-    double WordsCompleted = PossibleSolutions.size();
-    double average;
-    double PercentCompleted;
 
-    int control;
   //cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works." << endl << "More features coming soon!" << endl;
     cout << "Enter the number corresponding to what feature you would like to use." << endl;
     cout << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
@@ -614,6 +714,7 @@ int main() {
     cout << "3 - Random Word Method Solver: The bot will use your starting word to solve for all solutions by choosing a random" << endl << "possible word. The statistics from it's run will be displayed." << endl;
     cout << "4 - Best Starting Word: Applies feature three to all the solutions to find the best starting word." << endl;
     cout << "5 - Maximum Performance: Applies my best algorithm to each possible solution and provides statistics about its findings." << endl;
+    int control;
     cin >> control;
    
     if (control == 1) {
@@ -621,11 +722,29 @@ int main() {
     }
     else if (control == 2) {
         cout << endl << "What word would you like the bot to solve?" << endl;
+        string word;
         cin >> word;
-        cout << endl << "It took the bot " << SmartSolver(word) << " guesses.";
+        int ret = SmartSolver(word);
+        for (int i = 0; i < guesses.size(); i++) {
+            cout << "The bot guessed: " << guesses[i] << "." << endl;
+        }
+        cout << endl << "It took the bot " << ret << " guesses.";
+        guesses.clear();
     }   
     else if (control == 3) {
-        cout << "What starting word do want the machine to use? Stare is my suggestion." << endl;
+        string firstWord;
+        double NumberOfOnes = 0;
+        double NumberOfTwos = 0;
+        double NumberOfThrees = 0;
+        double NumberOfFours = 0;
+        double NumberOfFives = 0;
+        double NumberOfSixes = 0;
+        double NumberOfFails = 0;
+        double sum = 0;
+        double average;
+        double PercentCompleted;
+        double WordsCompleted = PossibleSolutions.size();
+        cout << "What starting word do want the machine to use? Raise is my suggestion." << endl;
         cin >> firstWord;
         while (Converter(firstWord).size() != 5) {
             cout << "Not a viable option. Pick a different word." << endl;
@@ -697,23 +816,23 @@ int main() {
         double percent = 0;
         vector<string> clone = PossibleSolutions;
         vector<string> sample;
-        for (int samples = 0; samples < 3; samples++) {
-            for (int ran = 0; ran < 33; ran++) {
-                int index = rand() % clone.size();
-                sample.push_back(clone[index]);
-                clone.erase(clone.begin() + index);
-            }
-            for (int i = 0; i < sample.size(); i++) {
-                percent += 100 / sample.size();
-                cout << percent << "% ";
-                sum += SmartSolver(sample[i]);
-            }
-            double average = sum / sample.size();
-            cout << endl << "The average number of guesses was " << average << "." << endl;
-            sample.clear();
-            percent = 0;
-            sum = 0;
+        for (int ran = 0; ran < 50; ran++) {
+            int index = rand() % clone.size();
+            sample.push_back(clone[index]);
+            clone.erase(clone.begin() + index);
         }
+        for (int i = 0; i < sample.size(); i++) {
+            cout << sample[i] << " (" << SmartSolver(sample[i]) << ") ";
+            sum += SmartSolver(sample[i]);
+        }
+        double average = sum / sample.size();
+        cout << endl << "The average number of guesses was " << average << "." << endl;
+        sample.clear();
+        cout << endl;
+        sum = 0;
+        cout << "Press any button to close.";
+        char close;
+        cin >> close;
     }
 }
 
