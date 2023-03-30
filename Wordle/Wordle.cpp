@@ -358,20 +358,26 @@ double RandomWord(string firstWord, string currentSolution) {
     string randomGuess;
 
         if (currentSolution != firstWord) {
-            vector<string> tire1 = RemainingWords(currentSolution, firstWord, PossibleSolutions, 1, false, { "filler" });
+            guesses.push_back("raise");
+            vector<string> tire1 = RemainingWords(currentSolution, "raise", PossibleSolutions, 1, false, { "filler" });
             randomGuess = tire1[rand() % tire1.size()];
+            guesses.push_back(randomGuess);
             if (randomGuess != currentSolution) {
                 vector<string> tire2 = RemainingWords(currentSolution, randomGuess, tire1, 2, false, { "filler" });
                 randomGuess = tire2[rand() % tire2.size()];
+                guesses.push_back(randomGuess);
                 if (randomGuess != currentSolution) {
                     vector<string> tire3 = RemainingWords(currentSolution, randomGuess, tire2, 3, false, { "filler" });
                     randomGuess = tire3[rand() % tire3.size()];
+                    guesses.push_back(randomGuess);
                     if (randomGuess != currentSolution) {
                         vector<string> tire4 = RemainingWords(currentSolution, randomGuess, tire3, 4, false, { "filler" });
                         randomGuess = tire4[rand() % tire4.size()];
+                        guesses.push_back(randomGuess);
                         if (randomGuess != currentSolution) {
                             vector<string> tire5 = RemainingWords(currentSolution, randomGuess, tire4, 5, false, { "filler" });
                             randomGuess = tire5[rand() % tire5.size()];
+                            guesses.push_back(randomGuess);
                             if (randomGuess != currentSolution) {
                                 HowMany = 7;
                             }
@@ -472,10 +478,10 @@ void InteractiveHelper() {
     string color5;
     string winner;
     vector<string> clone = PossibleSolutions;
-    cout << "This is the Solving Assistant. It will tell you all of the remaining possible solutions to your daily wordle. ";
+    cout << endl << "This is the Solving Assistant. It will tell you all of the remaining possible solutions to your daily wordle." << endl;
     cout << endl << "What will your first guess be?" << endl;
     cin >> guess1;
-    cout << "Did you get it? yes or no?"<<endl;
+    cout << endl << "Did you get it? yes or no?"<<endl;
     cin >> winner;
     if (winner == "yes") {
         cout << endl << endl << "Good job you defintely didn't cheat!";
@@ -493,13 +499,13 @@ void InteractiveHelper() {
     cin >> color5;
     vector<string> inputted{ color1,color2,color3,color4,color5 };
     vector<string> List1 = RemainingWords("sucks", guess1, clone, 1, true, inputted);
-    cout << "The remaining possible solutions are:" << endl << endl;
+    cout << endl << "The remaining possible solutions are:" << endl << endl;
     for (int a = 0; a < List1.size(); a++) {
         cout << List1[a]<<" ";
     }
     cout << endl << endl << "What will your second guess be?" << endl;
     cin >> guess1;
-    cout << endl << "Did you get it? yes or no?"<<endl;
+    cout << endl << "Did you get it? yes or no?" << endl;
     cin >> winner;
     if (winner == "yes") {
         cout << endl << endl << "Good job you got it in 2 guesses!";
@@ -517,7 +523,7 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List2 = RemainingWords("sucks", guess1, List1, 2, true, inputted);
-    cout << "The remaining possible solutions are:" << endl;
+    cout << endl << "The remaining possible solutions are:" << endl << endl;
     for (int a = 0; a < List2.size(); a++) {
         cout << List2[a] << " ";
     }
@@ -541,7 +547,7 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List3 = RemainingWords("sucks", guess1, List2, 2, true, inputted);
-    cout << "The remaining possible solutions are:" << endl;
+    cout << endl << "The remaining possible solutions are:" << endl << endl;
     for (int a = 0; a < List3.size(); a++) {
         cout << List3[a] << " ";
     }
@@ -565,7 +571,7 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List4 = RemainingWords("sucks", guess1, List3, 2, true, inputted);
-    cout << "The remaining possible solutions are:" << endl;
+    cout << endl << "The remaining possible solutions are:" << endl << endl;
     for (int a = 0; a < List4.size(); a++) {
         cout << List4[a] << " ";
     }
@@ -589,7 +595,7 @@ void InteractiveHelper() {
     cin >> color5;
     inputted = { color1,color2,color3,color4,color5 };
     vector<string> List5 = RemainingWords("sucks", guess1, List4, 2, true, inputted);
-    cout << "The remaining possible solutions are:" << endl;
+    cout << endl << "The remaining possible solutions are:" << endl << endl;
     for (int a = 0; a < List5.size(); a++) {
         cout << List5[a] << " ";
     }
@@ -608,15 +614,15 @@ void InteractiveHelper() {
 }
 
 //solves by choosing the word that will result in the lowest number of average words remaining
-int SmartSolver(string solution) {
+int SmartSolver(string solution, string firstWord) {
     vector<string> coloures;
-    if (solution == "raise") {
+    if (solution == firstWord) {
         return 1;
     }
-    guesses.push_back("raise");
+    guesses.push_back(firstWord);
     string guess;
-    coloures = Colors(solution, "raise");
-    vector<string> time1 = RemainingWords(solution, "raise", PossibleSolutions, 1, true, coloures);
+    coloures = Colors(solution, firstWord);
+    vector<string> time1 = RemainingWords(solution, firstWord, PossibleSolutions, 1, true, coloures);
     if (fourValuesEqual(coloures) && time1.size() > 2) {
         vector<char> param;
         int spot = whichSpot(coloures);
@@ -710,129 +716,85 @@ int main() {
   //cout << "This is the Wordle Solver created by Seamus Leonard! This is version 1.0.0, so only the first feature works." << endl << "More features coming soon!" << endl;
     cout << "Enter the number corresponding to what feature you would like to use." << endl;
     cout << "1 - Solving Assitant: Helps you solve your Wordle by giving you all remaining solutions." << endl;
-    cout << "2 - Single Word Solver: The bot solves a provided word, outputting each guess and how man guesses it took" << endl;
-    cout << "3 - Random Word Method Solver: The bot will use your starting word to solve for all solutions by choosing a random" << endl << "possible word. The statistics from it's run will be displayed." << endl;
-    cout << "4 - Best Starting Word: Applies feature three to all the solutions to find the best starting word." << endl;
-    cout << "5 - Maximum Performance: Applies my best algorithm to each possible solution and provides statistics about its findings." << endl;
+    cout << "2 - Random Single Word Solver: The bot will solve a given word by choosing random possible word." << endl;
+    cout << "3 - Smart Single Word Solver: The bot solves a provided word, outputting each guess and how man guesses it took" << endl;
+    //cout << "4 - Best Starting Word: Applies feature three to all the solutions to find the best starting word." << endl;
+    cout << "4 - Maximum Performance: Applies my best algorithm to each possible solution and provides statistics about its findings." << endl;
+    cout << endl;
     int control;
     cin >> control;
-   
-    if (control == 1) {
-        InteractiveHelper();
-    }
-    else if (control == 2) {
-        cout << endl << "What word would you like the bot to solve?" << endl;
-        string word;
-        cin >> word;
-        int ret = SmartSolver(word);
-        for (int i = 0; i < guesses.size(); i++) {
-            cout << "The bot guessed: " << guesses[i] << "." << endl;
+    
+    while (control == 1 || control == 2 || control == 3 || control == 4) {
+
+        if (control == 1) {
+            InteractiveHelper();
+            cout << endl << endl << "Enter a feature's corresponding number if you wish to continue. Enter any other number to quit." << endl << endl;
+            cin >> control;
         }
-        cout << endl << "It took the bot " << ret << " guesses.";
-        guesses.clear();
-    }   
-    else if (control == 3) {
-        string firstWord;
-        double NumberOfOnes = 0;
-        double NumberOfTwos = 0;
-        double NumberOfThrees = 0;
-        double NumberOfFours = 0;
-        double NumberOfFives = 0;
-        double NumberOfSixes = 0;
-        double NumberOfFails = 0;
-        double sum = 0;
-        double average;
-        double PercentCompleted;
-        double WordsCompleted = PossibleSolutions.size();
-        cout << "What starting word do want the machine to use? Raise is my suggestion." << endl;
-        cin >> firstWord;
-        while (Converter(firstWord).size() != 5) {
-            cout << "Not a viable option. Pick a different word." << endl;
+
+        else if (control == 2) {
+            cout << endl << "Enter the word would you like the bot to solve." << endl << endl;
+            string word;
+            cin >> word;
+            double ret = RandomWord("raise", word);
+            cout << endl;
+            for (int i = 0; i < guesses.size(); i++) {
+                cout << "The bot guessed: " << guesses[i] << "." << endl;
+            }
+            guesses.clear();
+            cout << endl << "It took the bot " << ret << " guesses.";
+            cout << endl << endl << "Enter a feature's corresponding number if you wish to continue. Enter any other number to quit." << endl << endl;
+            cin >> control;
+        }
+
+        else if (control == 3) {
+            cout << endl << "What word would you like the bot to solve?" << endl << endl;
+            string word;
+            cin >> word;
+            int ret = SmartSolver(word,"raise");
+            cout << endl;
+            for (int i = 0; i < guesses.size(); i++) {
+                cout << "The bot guessed: " << guesses[i] << "." << endl;
+            }
+            cout << endl << "It took the bot " << ret << " guesses.";
+            guesses.clear();
+            cout << endl << endl << "Enter a feature's corresponding number if you wish to continue. Enter any other number to quit." << endl << endl;
+            cin >> control;
+        }
+  
+
+        /*else if (control == 5) {
+            cout << "This will take forever." << endl << endl;
+            cout << "The best starting word is: " << BestStartingWord() << ".";
+            cout << endl << "Enter a feature's corresponding number if you wish to continue. Enter any other number to quit.";
+            cin >> control;
+        }*/
+
+        else if (control == 4) {
+            srand(time(0));
+            cout << endl << "What word would you like the bot to start with. Words with uncommon letters will lead to longer computation time and" << endl << "worse results. The bot likes raise." << endl;
+            string firstWord;
             cin >> firstWord;
+            cout << "This could take a while." << endl << endl;
+            double sum = 0;
+            double percent = 0;
+            vector<string> clone = PossibleSolutions;
+            vector<string> sample;
+            for (int ran = 0; ran < 50; ran++) {
+                int index = rand() % clone.size();
+                sample.push_back(clone[index]);
+                clone.erase(clone.begin() + index);
+            }
+            for (int i = 0; i < sample.size(); i++) {
+                cout << sample[i] << " (" << SmartSolver(sample[i],firstWord) << ") ";
+                sum += SmartSolver(sample[i],firstWord);
+            }
+            double average = sum / sample.size();
+            cout << endl << "The average number of guesses was " << average << "." << endl;
+            sample.clear();
+            cout << endl << endl << "Enter a feature's corresponding number if you wish to continue. Enter any other number to quit." << endl << endl;
+            cin >> control;
         }
-        cout << endl << "This could take some time." << endl << endl;
-
-        for (int word = 0; word < PossibleSolutions.size(); word++) {
-            if (word % 121 == 0) {
-                consoleCounter += 5;
-                cout << consoleCounter << "% ";
-            }
-            double howMany = RandomWord(firstWord, PossibleSolutions[word]);
-            if (howMany == 1) {
-                NumberOfOnes++;
-                sum += 1;
-            }
-            else if (howMany == 2) {
-                NumberOfTwos++;
-                sum += 2;
-            }
-            else if (howMany == 3) {
-                NumberOfThrees++;
-                sum += 3;
-            }
-            else if (howMany == 4) {
-                NumberOfFours++;
-                sum += 4;
-            }
-            else if (howMany == 5) {
-                NumberOfFives++;
-                sum += 5;
-            }
-            else if (howMany == 6) {
-                NumberOfSixes++;
-                sum += 6;
-            }
-            else {
-                NumberOfFails++;
-                WordsCompleted--;
-            }
-        }
-
-        cout << endl << endl << "The results were as follows: " << endl;
-        cout << "Number of 1s: " << NumberOfOnes << endl;
-        cout << "Number of 2s: " << NumberOfTwos << endl;
-        cout << "Number of 3s: " << NumberOfThrees << endl;
-        cout << "Number of 4s: " << NumberOfFours << endl;
-        cout << "Number of 5s: " << NumberOfFives << endl;
-        cout << "Number of 6s: " << NumberOfSixes << endl;
-        cout << "Number of fails: " << NumberOfFails << endl << endl;
-
-        average = sum / WordsCompleted;
-        cout << "The average number of guesses for completed words was: " << average << endl;
-        PercentCompleted = 100 - (1 - WordsCompleted / PossibleSolutions.size()) * 100;
-        cout << "The percent of words completed was: " << PercentCompleted;
-
-    }
-
-    else if (control == 4) {
-        cout << "This will take forever." << endl << endl;
-        cout << "The best starting word is: " << BestStartingWord() << ".";
-    }
-   
-    else if (control == 5){
-        srand(time(0));
-        cout << "This could take a while." << endl << endl;
-        double sum = 0;
-        double percent = 0;
-        vector<string> clone = PossibleSolutions;
-        vector<string> sample;
-        for (int ran = 0; ran < 50; ran++) {
-            int index = rand() % clone.size();
-            sample.push_back(clone[index]);
-            clone.erase(clone.begin() + index);
-        }
-        for (int i = 0; i < sample.size(); i++) {
-            cout << sample[i] << " (" << SmartSolver(sample[i]) << ") ";
-            sum += SmartSolver(sample[i]);
-        }
-        double average = sum / sample.size();
-        cout << endl << "The average number of guesses was " << average << "." << endl;
-        sample.clear();
-        cout << endl;
-        sum = 0;
-        cout << "Press any button to close.";
-        char close;
-        cin >> close;
     }
 }
 
